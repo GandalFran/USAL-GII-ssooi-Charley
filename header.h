@@ -22,12 +22,12 @@ typedef enum {NONE_MODE, NORMAL_MODE, FAST_MODE} Mode;
 #define EXECUTABLE_PATH "."
 
 //args
-#define CHARLIE_ARG "charlie"
-#define BOSLEY_ARG "bosley"
-#define MALO_ARG "malo"
-#define SABRINA_ARG "sabrina"
-#define KELLY_ARG "kelly"
-#define JILL_ARG "jill"
+#define CHARLIE_ARG "./charlie"
+#define BOSLEY_ARG "./bosley"
+#define MALO_ARG "./malo"
+#define SABRINA_ARG "./sabrina"
+#define KELLY_ARG "./kelly"
+#define JILL_ARG "./jill"
 
 #define NORMAL_ARG "normal"
 #define FAST_ARG "fast"
@@ -36,23 +36,37 @@ typedef enum {NONE_MODE, NORMAL_MODE, FAST_MODE} Mode;
 //constants
 #define N_REENCARNATIONS 20
 #define N_SHOT_TRIES 3
-#define MAP_SIZE (sizeof(int)*20)
+#define N_ANGELS 3
+#define MAP_SIZE (sizeof(int)*N_REENCARNATIONS)
 #define PIDS_FILE "pids.bin"
 
 //define signal names 
 #define SIGNAL_SHOT SIGTERM
 #define SIGNAL_START_SHOT SIGUSR1
 #define SIGNAL_REENCARNATION SIGALRM
-#define SIGNAL_VILLIAN_CREATED SIGUSR2
-#define SIGNAL_ANGELS_CREATED SIGUSR1
+#define SIGNAL_VILLIAN_CREATED SIGUSR1
+#define SIGNAL_ANGELS_CREATED SIGUSR2
+#define SIGNAL_TERMINATE SIGINT
 
 //random numbers
-#define GET_RANDOM(min,max) ( (min) + ( rand() * ((max)-(min)) ) )
+#define GET_RANDOM(min,max) ( (min)+(int)(rand()/(1.0+RAND_MAX)*((max)-(min)+1)) )
 #define GET_NEW_SLEEP_TIME ( GET_RANDOM(6,12))
 #define GET_TIME_TO_REENCARNATE ( GET_RANDOM(1,3))
 #define GET_NEW_TARGET ( GET_RANDOM(0,N_REENCARNATIONS-1))
+#define GET_WRITE_POSITION ( GET_RANDOM(0,N_REENCARNATIONS-1))
 
+//exit codes
+#define EXIT_BOSLEY_SABRINA_SUCESS 0
+#define EXIT_BOSLEY_JILL_SUCESS 1
+#define EXIT_BOSLEY_KELLY_SUCESS 2
+#define EXIT_BOSLEY_ANGELS_FAILED 3
 
+#define EXIT_ANGEL_HIT_TARGET 0
+#define EXIT_ANGEL_FAILED 1
+
+#define EXIT_VILLIAN_REENCARNATED 0
+#define EXIT_VILLIAN_NO_REENCARNATIONS_LEFT 1
+#define EXIT_VILLIAN_MURDERED 2
 
 //Log errors
 #define LOG(returnValue)                                                   		 	\
@@ -102,11 +116,7 @@ typedef enum {NONE_MODE, NORMAL_MODE, FAST_MODE} Mode;
 //others 
 #define REDEFINE_EXECUTABLE_NAME(actualName,newName)			\
     do{															\
-    	logStdin("changed");									\
-    	char nameTag[80], nameTag2[80];							\
-    	sprintf(nameTag,"%s/%s",EXECUTABLE_PATH,actualName);	\
-    	sprintf(nameTag2,"%s/%s",EXECUTABLE_PATH,newName);		\
- 		EXIT_ON_FAILURE(execl(nameTag, nameTag2, NULL));		\
+ 		EXIT_ON_FAILURE(execl(actualName, newName, NULL));		\
 	}while(0)	
 
 #endif
