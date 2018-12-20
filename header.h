@@ -18,7 +18,17 @@ typedef enum {NONE_MODE, NORMAL_MODE, FAST_MODE} Mode;
 #define TRUE    1
 #define FALSE   0
 
+
+#define EXECUTABLE_PATH "."
+
 //args
+#define CHARLIE_ARG "charlie"
+#define BOSLEY_ARG "bosley"
+#define MALO_ARG "malo"
+#define SABRINA_ARG "sabrina"
+#define KELLY_ARG "kelly"
+#define JILL_ARG "jill"
+
 #define NORMAL_ARG "normal"
 #define FAST_ARG "fast"
 #define USAGE_ERROR "./charlie [fast | normal]"
@@ -40,7 +50,7 @@ typedef enum {NONE_MODE, NORMAL_MODE, FAST_MODE} Mode;
 #define GET_RANDOM(min,max) ( (min) + ( rand() * ((max)-(min)) ) )
 #define GET_NEW_SLEEP_TIME ( GET_RANDOM(6,12))
 #define GET_TIME_TO_REENCARNATE ( GET_RANDOM(1,3))
-#define GET_NEW_TARGET ( GET_RANDOM(1,20))
+#define GET_NEW_TARGET ( GET_RANDOM(0,N_REENCARNATIONS-1))
 
 
 
@@ -90,7 +100,13 @@ typedef enum {NONE_MODE, NORMAL_MODE, FAST_MODE} Mode;
     }while(0)
 
 //others 
-#define REDEFINE_EXECUTABLE_NAME
-
+#define REDEFINE_EXECUTABLE_NAME(actualName,newName)			\
+    do{															\
+    	logStdin("changed");									\
+    	char nameTag[80], nameTag2[80];							\
+    	sprintf(nameTag,"%s/%s",EXECUTABLE_PATH,actualName);	\
+    	sprintf(nameTag2,"%s/%s",EXECUTABLE_PATH,newName);		\
+ 		EXIT_ON_FAILURE(execl(nameTag, nameTag2, NULL));		\
+	}while(0)	
 
 #endif

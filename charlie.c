@@ -35,14 +35,22 @@ int main(int argc, char *argv[]){
 	EXIT_ON_FAILURE(sigfillset(&allSignalsSet));
 	EXIT_ON_FAILURE(sigprocmask(SIG_SETMASK, &allSignalsSet, NULL));
 
-	//redefine sigchild to be ignored and let the child process die in peace
-	REDEFINE_SIGNAL(SIGCHLD,SIG_IGN);
-
-	//go to charly
-	charley();
+	//switch the argv name
+	if(!strcmp(argv[0],CHARLIE_ARG)){
+		charley();
+	}else if(!strcmp(argv[0],BOSLEY_ARG)){
+		bosley();
+	}else if(!strcmp(argv[0],MALO_ARG)){
+		villian();
+	}else if(!strcmp(argv[0],SABRINA_ARG) || strcmp(argv[0],KELLY_ARG) || strcmp(argv[0],JILL_ARG)){
+		angel();
+	}else{
+		EXIT_ON_FAILURE(-1);
+	}
 }
 
 void charley(void){
+logStdin("charley");
 	pid_t pbosley, pvillian, precived;
 	sigset_t angelsCreated;
 
@@ -52,16 +60,14 @@ void charley(void){
 	//create bosley process
 	pbosley = fork();
 	if(pbosley == 0){
-		REDEFINE_EXECUTABLE_NAME
-		bosley();
+		REDEFINE_EXECUTABLE_NAME(CHARLIE_ARG,BOSLEY_ARG);
 	}
 	//wait for the angels creation
 	sigsuspend(&angelsCreated);
 	//create villian
 	pvillian = fork();
 	if(pvillian == 0){
-		REDEFINE_EXECUTABLE_NAME
-		villian();
+		REDEFINE_EXECUTABLE_NAME(CHARLIE_ARG,MALO_ARG);
 	}
 	//advise bosley villian has been created
 	kill(pbosley,SIGNAL_VILLIAN_CREATED);
@@ -70,16 +76,18 @@ void charley(void){
 		precived = waitpid(-1, NULL, 0);
 		if(precived == pvillian){
 			logStdin("villian died");
-			exit(EXIT_SUCCESS);
+		}else if(precived == pbosley){
+			logStdin("bosley died");
+			closeMappedFile();
+			exit(-1);
 		}
 	}
 }
 
 void bosley(void){
+logStdin("bosley");
 	pid_t psabrina,pjill,pkelly,precived;
 	sigset_t villiancreated;
-
-	REDEFINE_EXECUTABLE_NAME
 
 	EXIT_ON_FAILURE(sigfillset(&villiancreated));
 	EXIT_ON_FAILURE(sigdelset(&villiancreated, SIGNAL_VILLIAN_CREATED));
@@ -87,18 +95,15 @@ void bosley(void){
 	//create angels
 	psabrina = fork();
 	if(psabrina == 0){
-		REDEFINE_EXECUTABLE_NAME
-		angel();
+		REDEFINE_EXECUTABLE_NAME(CHARLIE_ARG,SABRINA_ARG);
 	}
 	pjill = fork();
 	if(pjill == 0){
-		REDEFINE_EXECUTABLE_NAME
-		angel();
+		REDEFINE_EXECUTABLE_NAME(CHARLIE_ARG,JILL_ARG);
 	}
 	pkelly = fork();
 	if(pkelly == 0){
-		REDEFINE_EXECUTABLE_NAME
-		angel();
+		REDEFINE_EXECUTABLE_NAME(CHARLIE_ARG,KELLY_ARG);
 	}
 	//advise father the angels has been created
 	kill(getppid(),SIGNAL_ANGELS_CREATED); 
@@ -121,6 +126,7 @@ void bosley(void){
 }
 
 int angel(){
+logStdin("angel");
 	int i, target, timeToStartShotting;
 
 	timeToStartShotting = GET_NEW_SLEEP_TIME;
@@ -140,6 +146,7 @@ int angel(){
 }
 
 void villian(void){
+logStdin("villian");
 	pid_t newChild;
 	int reencarnationsLeft, timeToReincarnation;
 	sigset_t waitForShotOrReencarnationMask;
@@ -202,7 +209,6 @@ void closeMappedFile(void){
 }
 
 void logStdin(char * str){
-	write(1,str,strlen(str));
+	//write(1,str,strlen(str));
+	fprintf(stderr, "\n[%d]%s",getpid(),str);
 }
-
-
